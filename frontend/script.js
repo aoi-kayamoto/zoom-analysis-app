@@ -1,46 +1,48 @@
 const uploadForm = document.getElementById("uploadForm");
 const fileInput = document.getElementById("fileInput");
-const resultBox = document.getElementById("result");
-const statusBox = document.getElementById("status");
+const resultBox = document.getElementById("resultBox");
+const statusText = document.getElementById("statusText");
 
 uploadForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const file = fileInput.files[0];
-  if (!file) {
-    alert("ファイルを選択してください");
-    return;
-  }
-
-  statusBox.innerText = "アップロード中...";
-  resultBox.innerHTML = "";
-
-  const formData = new FormData();
-  formData.append("file", file);
-
-  try {
-    // 🔥 ここが超重要（絶対URLではなく相対パス）
-    const response = await fetch("/analyze", {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!response.ok) {
-      throw new Error("サーバーエラーが発生しました");
+    if (!fileInput.files.length) {
+        alert("ファイルを選択してください");
+        return;
     }
 
-    const data = await response.json();
+    const formData = new FormData();
+    formData.append("file", fileInput.files[0]);
 
-    statusBox.innerText = "分析完了";
+    statusText.innerText = "アップロード中...";
+    resultBox.innerHTML = "";
 
-    resultBox.innerHTML = `
-      <h3>分析結果</h3>
-      <p><strong>コーチ話者割合:</strong> ${data.coach_ratio}%</p>
-      <p><strong>受講生話者割合:</strong> ${data.student_ratio}%</p>
-      <p><strong>最長連続発話:</strong> ${data.longest_speech} 秒</p>
-    `;
-  } catch (error) {
-    statusBox.innerText = "エラーが発生しました";
-    resultBox.innerHTML = `<p style="color:red;">${error.message}</p>`;
-  }
+    try {
+        const response = await fetch("/analyze", {
+            method: "POST",
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error("サーバーエラー");
+        }
+
+        const data = await response.json();
+
+        statusText.innerText = "分析完了！";
+
+        resultBox.innerHTML = `
+            <h3>📝 文字起こし</h3>
+            <p>${data.text}</p>
+        `;
+
+    } catch (error) {
+        console.error(error);
+        statusText.innerText = "";
+        resultBox.innerHTML = `
+            <div style="color:red;">
+                ❌ サーバーに接続できません。Renderが起動しているか確認してください。
+            </div>
+        `;
+    }
 });
