@@ -2,22 +2,47 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Coach Dashboard</title>
+<title>Zoom Analysis App</title>
 </head>
 <body>
 
-<h1>面談分析ツール</h1>
+<h1>Zoom分析アプリ</h1>
 
-<form id="uploadForm">
-  <input type="file" id="fileInput" required>
-  <button type="submit">分析する</button>
-</form>
+<input type="file" id="fileInput">
+<br><br>
+<button id="analyzeBtn">分析する</button>
 
-<p id="statusText"></p>
+<p id="status"></p>
 
-<div id="resultBox"></div>
+<script>
+document.getElementById("analyzeBtn").addEventListener("click", async () => {
+    const fileInput = document.getElementById("fileInput");
+    const file = fileInput.files[0];
 
-<script src="script.js"></script>
+    if (!file) {
+        document.getElementById("status").innerText = "⚠ ファイルが選択されていません";
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    document.getElementById("status").innerText = "解析中...";
+
+    try {
+        const response = await fetch("/analyze", {
+            method: "POST",
+            body: formData
+        });
+
+        const result = await response.json();
+        document.getElementById("status").innerText = "完了: " + JSON.stringify(result);
+
+    } catch (error) {
+        document.getElementById("status").innerText = "エラー: " + error;
+    }
+});
+</script>
+
 </body>
 </html>
