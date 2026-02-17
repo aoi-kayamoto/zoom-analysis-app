@@ -1,24 +1,34 @@
-from pathlib import Path
 from fastapi import FastAPI, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
-from fastapi.staticfiles import StaticFiles
+import os
 
 app = FastAPI()
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-FRONTEND_DIR = BASE_DIR / "frontend"
-INDEX_HTML = FRONTEND_DIR / "index.html"
+# CORS設定（フロントと接続するため）
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+FRONTEND_PATH = os.path.join(BASE_DIR, "..", "frontend", "index.html")
+
 
 @app.get("/")
-async def root():
-    return FileResponse(INDEX_HTML)
+def read_index():
+    return FileResponse(FRONTEND_PATH)
+
 
 @app.post("/analyze")
 async def analyze(file: UploadFile = File(...)):
+    # 今は簡易テスト版（まず確実に動かす）
     return {
-        "coach_ratio": 60,
-        "student_ratio": 40,
-        "longest_speech": 32
+        "coach_ratio": "40%",
+        "student_ratio": "60%",
+        "longest_speech": "45秒",
+        "feedback": "受講生がしっかり話せています 👍"
     }
