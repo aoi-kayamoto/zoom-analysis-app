@@ -1,5 +1,5 @@
 from pathlib import Path
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -14,3 +14,13 @@ app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 @app.get("/")
 async def root():
     return FileResponse(INDEX_HTML)
+
+
+@app.post("/analyze")
+async def analyze(file: UploadFile = File(...)):
+    # 仮のダミー分析（まずは動作確認）
+    return {
+        "coach_ratio": 60,
+        "student_ratio": 40,
+        "longest_speech": 32
+    }
