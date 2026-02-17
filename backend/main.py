@@ -15,10 +15,8 @@ app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 async def root():
     return FileResponse(INDEX_HTML)
 
-
 @app.post("/analyze")
 async def analyze(file: UploadFile = File(...)):
-    # 仮のダミー分析（まずは動作確認）
     return {
         "coach_ratio": 60,
         "student_ratio": 40,
