@@ -32,17 +32,14 @@ uploadForm.addEventListener("submit", async (e) => {
         statusText.innerText = "分析完了！";
 
         resultBox.innerHTML = `
-            <h3>📝 文字起こし</h3>
-            <p>${data.text}</p>
+            <h3>結果</h3>
+            <p>コーチ発話割合: ${data.coach_ratio}</p>
+            <p>受講生発話割合: ${data.student_ratio}</p>
+            <p>最長連続発話: ${data.longest_speech}</p>
+            <p>フィードバック: ${data.feedback}</p>
         `;
-
     } catch (error) {
+        statusText.innerText = "エラーが発生しました";
         console.error(error);
-        statusText.innerText = "";
-        resultBox.innerHTML = `
-            <div style="color:red;">
-                ❌ サーバーに接続できません。Renderが起動しているか確認してください。
-            </div>
-        `;
     }
 });
