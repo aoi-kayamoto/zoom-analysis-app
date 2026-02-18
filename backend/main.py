@@ -1,5 +1,4 @@
 from fastapi import FastAPI, UploadFile, File
-from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import shutil
@@ -20,10 +19,6 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-# 👇 ここ重要
-app.mount("/", StaticFiles(directory=BASE_DIR, html=True), name="frontend")
-
-
 @app.post("/analyze")
 async def analyze(file: UploadFile = File(...)):
     file_path = os.path.join(UPLOAD_DIR, file.filename)
@@ -37,3 +32,6 @@ async def analyze(file: UploadFile = File(...)):
         "longest_speech": "2分15秒",
         "feedback": "コーチがやや話しすぎ傾向です"
     }
+
+# 👇 必ず一番最後に置く
+app.mount("/", StaticFiles(directory=BASE_DIR, html=True), name="frontend")
