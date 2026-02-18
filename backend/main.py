@@ -1,5 +1,5 @@
 from fastapi import FastAPI, UploadFile, File
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 import shutil
 import os
@@ -14,16 +14,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-@app.get("/", response_class=HTMLResponse)
+@app.get("/")
 async def root():
-    return FileResponse(os.path.join(BASE_DIR, "index.html"))
-
-@app.get("/script.js")
-async def script():
-    return FileResponse(os.path.join(BASE_DIR, "script.js"))
+    return FileResponse("index.html")
 
 @app.post("/analyze")
 async def analyze(file: UploadFile = File(...)):
-    return {"message": "ファイル受信成功"}
+    file_path = os.path.join(UPLOAD_DIR, file.filename)
+
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    # 仮の分析結果
+    return {
+        "coach_ratio": "60%",
+        "student_ratio": "40%",
+        "longest_speech": "2分15秒",
+        "feedback": "コーチがやや話しすぎ傾向です"
+    }
