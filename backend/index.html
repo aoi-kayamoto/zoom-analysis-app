@@ -1,49 +1,57 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<title>Zoom Analysis App</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zoom Analysis App</title>
 </head>
 <body>
+  <h1>Zoom分析アプリ</h1>
 
-<h1>Zoom分析アプリ</h1>
+  <input type="file" id="fileInput" />
+  <br /><br />
 
-<input type="file" id="fileInput">
-<br><br>
-<button id="analyzeBtn">分析する</button>
+  <!-- ★ type="button" が重要（変な送信を防ぐ） -->
+  <button id="analyzeBtn" type="button">分析する</button>
 
-<p id="status"></p>
+  <p id="status"></p>
 
-<script>
-document.getElementById("analyzeBtn").addEventListener("click", async () => {
-
+  <script>
     const fileInput = document.getElementById("fileInput");
-    const file = fileInput.files[0];
+    const statusEl = document.getElementById("status");
+    const analyzeBtn = document.getElementById("analyzeBtn");
 
-    if (!file) {
-        document.getElementById("status").innerText = "⚠ ファイルが選択されていません";
+    analyzeBtn.addEventListener("click", async () => {
+      const file = fileInput.files[0];
+      if (!file) {
+        statusEl.innerText = "⚠️ ファイルを選択してください";
         return;
-    }
+      }
 
-    const formData = new FormData();
-    formData.append("file", file);
+      const formData = new FormData();
+      formData.append("file", file);
 
-    document.getElementById("status").innerText = "解析中...";
+      statusEl.innerText = "アップロード中...";
 
-    try {
-        const response = await fetch("/analyze", {
-            method: "POST",
-            body: formData
+      try {
+        const res = await fetch("/analyze", {
+          method: "POST",
+          body: formData,
         });
 
-        const result = await response.json();
-        document.getElementById("status").innerText = "完了: " + JSON.stringify(result);
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(`HTTP ${res.status}: ${text}`);
+        }
 
-    } catch (error) {
-        document.getElementById("status").innerText = "エラー: " + error;
-    }
-});
-</script>
-
+        const data = await res.json();
+        statusEl.innerText =
+          `完了！ コーチ:${data.coach_ratio} / 受講生:${data.student_ratio} / 最長:${data.longest_speech} / ${data.feedback}`;
+      } catch (e) {
+        console.error(e);
+        statusEl.innerText = "❌ エラー: " + e.message;
+      }
+    });
+  </script>
 </body>
 </html>
