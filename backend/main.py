@@ -19,7 +19,7 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 @app.get("/")
 async def root():
-    return FileResponse("index.html")
+    return FileResponse("backend/index.html")
 
 @app.post("/analyze")
 async def analyze(file: UploadFile = File(...)):
@@ -28,7 +28,6 @@ async def analyze(file: UploadFile = File(...)):
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    # 仮の分析結果
     return {
         "coach_ratio": "60%",
         "student_ratio": "40%",
