@@ -1,49 +1,68 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
+
 <head>
-<meta charset="UTF-8">
-<title>Zoom Analysis App</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zoom録画分析</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Noto Sans JP", "Hiragino Sans", "Helvetica", Arial, sans-serif;
+            margin: 40px;
+        }
+
+        h1 {
+            margin: 0 0 12px;
+        }
+
+        .muted {
+            color: #666;
+        }
+
+        .row {
+            margin-top: 16px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+
+        #status {
+            margin-top: 14px;
+            white-space: pre-wrap;
+        }
+
+        .box {
+            border: 1px solid #ddd;
+            padding: 18px;
+            border-radius: 10px;
+            max-width: 720px;
+        }
+    </style>
 </head>
+
 <body>
+    <h1>📊 Zoom録画分析</h1>
+    <div class="box">
+        <h2>ファイルをアップロード</h2>
+        <p class="muted">1on1面談のZoom録画ファイルをアップロードしてください。</p>
+        <p class="muted">対応形式: MP4, M4A, MP3, WAV</p>
 
-<h1>Zoom分析アプリ</h1>
+        <div class="row">
+            <input type="file" id="fileInput" accept=".mp4,.m4a,.mp3,.wav" />
+            <button id="startBtn" type="button">分析開始</button>
+        </div>
 
-<input type="file" id="fileInput">
-<br><br>
-<button id="analyzeBtn">分析する</button>
+        <div id="status">待機中…</div>
+    </div>
 
-<p id="status"></p>
-
-<script>
-document.getElementById("analyzeBtn").addEventListener("click", async () => {
-
-    const fileInput = document.getElementById("fileInput");
-    const file = fileInput.files[0];
-
-    if (!file) {
-        document.getElementById("status").innerText = "⚠ ファイルが選択されていません";
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    document.getElementById("status").innerText = "解析中...";
-
-    try {
-        const response = await fetch("/analyze", {
-            method: "POST",
-            body: formData
-        });
-
-        const result = await response.json();
-        document.getElementById("status").innerText = "完了: " + JSON.stringify(result);
-
-    } catch (error) {
-        document.getElementById("status").innerText = "エラー: " + error;
-    }
-});
-</script>
-
+    <!-- ここ重要：/static は backend が frontend フォルダを配信している -->
+    <script src="/static/upload.js"></script>
 </body>
+
 </html>
