@@ -1,57 +1,163 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Zoom Analysis App</title>
+  <title>Zoom分析（社内ツール）</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --card: #0f172a;
+      --card2: #111c33;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --border: rgba(255, 255, 255, .10);
+      --accent: #2563eb;
+      --danger: #ef4444;
+      --ok: #22c55e;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 24px;
+    }
+
+    .wrap {
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: linear-gradient(180deg, var(--card), var(--card2));
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+    }
+
+    h1 {
+      font-size: 20px;
+      margin: 0 0 6px;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 14px;
+    }
+
+    input[type="file"] {
+      flex: 1;
+      min-width: 260px;
+      background: rgba(255, 255, 255, .03);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px;
+      color: var(--text);
+    }
+
+    button {
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    .chip {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: rgba(255, 255, 255, .03);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .status {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    pre {
+      white-space: pre-wrap;
+      background: rgba(255, 255, 255, .03);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      min-height: 160px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .linkbtn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 10px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+  </style>
 </head>
+
 <body>
-  <h1>Zoom分析アプリ</h1>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <h1>Zoom分析（社内ツール）</h1>
+        <div class="muted">
+          共有URLで使用できます（社内パスコード必須）。<br />
+          ※アップロードしたファイルは解析後に削除され、保存されません。
+        </div>
+      </div>
+      <button class="linkbtn" id="setTokenBtn">社内パスコードを設定</button>
+    </div>
 
-  <input type="file" id="fileInput" />
-  <br /><br />
+    <div class="card">
+      <div class="row">
+        <input id="fileInput" type="file" accept=".mp4,.m4a,.mp3,.wav,.mov" />
+        <button id="analyzeBtn">分析する</button>
+        <span class="chip" id="hintChip">準備中…</span>
+      </div>
 
-  <!-- ★ type="button" が重要（変な送信を防ぐ） -->
-  <button id="analyzeBtn" type="button">分析する</button>
+      <div class="status" id="statusText">待機中</div>
 
-  <p id="status"></p>
+      <h3 style="margin:14px 0 8px;font-size:14px;">文字起こし結果</h3>
+      <pre id="resultBox">(ここに表示されます)</pre>
+    </div>
+  </div>
 
-  <script>
-    const fileInput = document.getElementById("fileInput");
-    const statusEl = document.getElementById("status");
-    const analyzeBtn = document.getElementById("analyzeBtn");
-
-    analyzeBtn.addEventListener("click", async () => {
-      const file = fileInput.files[0];
-      if (!file) {
-        statusEl.innerText = "⚠️ ファイルを選択してください";
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append("file", file);
-
-      statusEl.innerText = "アップロード中...";
-
-      try {
-        const res = await fetch("/analyze", {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!res.ok) {
-          const text = await res.text();
-          throw new Error(`HTTP ${res.status}: ${text}`);
-        }
-
-        const data = await res.json();
-        statusEl.innerText =
-          `完了！ コーチ:${data.coach_ratio} / 受講生:${data.student_ratio} / 最長:${data.longest_speech} / ${data.feedback}`;
-      } catch (e) {
-        console.error(e);
-        statusEl.innerText = "❌ エラー: " + e.message;
-      }
-    });
-  </script>
+  <script src="./script.js"></script>
 </body>
+
 </html>
